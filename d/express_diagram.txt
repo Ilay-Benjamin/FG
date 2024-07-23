@@ -1,0 +1,107 @@
+├── .env   
+├── .gitignore
+├── package.json    
+├── package-lock.json  
+├── node_modules/   
+├── logs/ 
+│   └── app.log
+├── config/
+│   ├── client/
+│   │   ├── client.config.json
+│   │   └── client.config.ts
+│   ├── server/
+│   │   ├── server.config.json 
+│   │   ├── server.config.ts
+│   │   ├── db.config.json
+│   │   └── db.config.ts
+│   ├── global/ 
+│   │   ├── app.config.json
+│   │   ├── app.config.ts
+│   │   └── env.config.ts
+│   └── tsconfig/
+│       ├── tsconfig.webpack.json
+│       ├── tsconfig.app.json
+│       ├── tsconfig.client.json
+│       ├── tsconfig.server.json
+│       ├── tsconfig.client.config.json
+│       └── tsconfig.server.config.json
+├── webpack/    
+│   ├── webapp.config.json
+│   └── webapp.config.ts
+├── public/
+│   ├── config/
+│   ├── js/
+│   └── css/
+├── build/      
+│   └── webapp.config.js   
+├── dist/
+│   ├── app/
+│   ├── index.js
+│   └── config/
+│       ├── server/  
+│       │   ├── db.config.js
+│       │   └── server.config.js
+│       └── global/  
+│           ├── env.config.js
+│           ├── app.config.js
+│           └── webapp/
+│               └── webapp.config.ts
+└── src/
+    ├── server.ts
+    ├── views/
+    │   ├── home.ejs
+    │   ├── error.html
+    │   └── login.html
+    ├── app/
+    │   ├── app.ts
+    │   ├── types/
+    │   │   └── user.type.ts
+    │   ├── middlewares/
+    │   │   └── auth.middleware.ts
+    │   ├── utils/
+    │   │   └── helpers.ts
+    │   ├── controllers/
+    │   │   └── home.controller.ts
+    │   ├── models/
+    │   │   └── user.model.ts
+    │   ├── services/
+    │   │   └── user.service.ts
+    │   └── routes/
+    │       └── home.routes.ts
+    └── client/
+        ├── index.ts
+        ├── components/
+        │   └── menu.component.ts
+        ├── models/
+        │   └── user.model.ts
+        ├── utils/
+        │   └── init.ts
+        ├── styles/
+        │   ├── main.scss
+        │   └── variables.scss
+        └── pages/
+            ├── home/
+            │   ├── styles/
+            │   │   └── home.scss
+            │   ├── images/
+            │   │   └── logo.png
+            │   ├── ts/
+            │   │   ├── index.ts
+            │   │   ├── home.model.ts
+            │   │   └── home.utils.ts
+            ├── login/
+            │   ├── ts/
+            │   │   ├── index.ts
+            │   │   ├── login.model.ts
+            │   │   └── login.utils.ts
+            │   ├── styles/
+            │   │   └── login.scss
+            │   └── images/
+            └── error/
+                ├── ts/
+                │   ├── index.ts
+                │   ├── error.model.ts
+                │   └── error.utils.ts
+                ├── styles/
+                │   └── error.scss
+                └── images/

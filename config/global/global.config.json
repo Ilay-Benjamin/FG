@@ -1,0 +1,76 @@
+{
+    "cli": {
+        "commands": [
+            {
+                "name": "build",
+                "description": "Build the project folders based on the given ascii tree",
+                "options": [
+                    {
+                        "name": "",
+                        "short": "",
+                        "help": "",
+                        "type": "",
+                        "isRequired": false,
+                        "default": null,
+                        "arguments": [
+                            {
+                                "name": "",
+                                "short": "",
+                                "help": "",
+                                "type": "",
+                                "isRequired": false,
+                                "default": null,
+                                "arguments": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "draw",
+                "description": "Build the project",
+                "options": [
+                    {
+                        "name": "",
+                        "short": "",
+                        "help": "",
+                        "type": "",
+                        "isRequired": false,
+                        "default": null,
+                        "arguments": []
+                    }
+                ]
+            },
+            {
+                "name": "test",
+                "description": "Test the project",
+                "options": [
+                    {
+                        "name": "",
+                        "short": "",
+                        "help": "",
+                        "type": "",
+                        "isRequired": false,
+                        "default": null,
+                        "arguments": []
+                    }
+                ]
+            },
+            {
+                "name": "help",
+                "description": "Show help",
+                "options": [
+                    {
+                        "name": "",
+                        "short": "",
+                        "help": "",
+                        "type": "",
+                        "isRequired": false,
+                        "default": null,
+                        "arguments": []
+                    }
+                ]
+            }
+        ]
+    }
+}
