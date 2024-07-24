@@ -274,7 +274,7 @@ class ContainerNode(Node):
         head_text += PrinterHelper.add_style(f"{indent}{connector}" f"{self.pos}. {self.name}", [PrinterHelper.Formats.BOLD, PrinterHelper.Colors.CYAN])
         head_text += PrinterHelper.add_style((" (Leaf)" if is_last else ""), PrinterHelper.Colors.BLUE)
         details = [
-            child_indent + head_text,
+            child_indent + head_text,q                                                                                                                          
             child_indent + PrinterHelper.add_style(f"  ~ Path: {self.assemble_path()}", PrinterHelper.Colors.GRAY),
             child_indent + PrinterHelper.add_style(f"  ~ Path: {self.assemble_path()}", PrinterHelper.Colors.GRAY),
             child_indent + PrinterHelper.add_style(f"  ~ Level: {self.level}", PrinterHelper.Colors.GRAY),

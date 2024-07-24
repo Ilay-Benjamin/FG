@@ -93,6 +93,8 @@ class PrinterHelper:
     Colors = PrinterData.Colors
     Formats = PrinterData.Formats    
 
+
+    
     @staticmethod
     def add_color(text:str, color:Union[PrinterData.Colors, List[PrinterData.Colors]]):
         return PrinterHelper.__add_to_text(text, [color] if not isinstance(color, list) else color)
