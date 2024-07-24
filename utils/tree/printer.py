@@ -33,6 +33,7 @@ class TreePrinter:
     class PrintFormats(Enum):
         STRUCTURE = 'structure',
         DETAILS = 'details',
+        SUMMARY = 'summary',
 
         @staticmethod
         def is_exists(format: 'TreePrinter.Formats'):
@@ -47,6 +48,16 @@ class TreePrinter:
 # <--------------------------- PrinterInterface ---------------------------->                                                                      
 
     class PrinterInterface(ABC):
+
+        @staticmethod
+        @abstractmethod
+        def get_summary_text(node: Union['ContainerNode', 'Node']) -> str:
+            pass
+
+        @staticmethod
+        @abstractmethod
+        def print_summary(node: Union['ContainerNode', 'Node']):
+            pass
         
         @staticmethod
         @abstractmethod
@@ -81,6 +92,21 @@ class TreePrinter:
         @staticmethod
         def get_type() -> 'TreePrinter.Types':
             return TreePrinter.Types.Container
+        
+        @staticmethod
+        def get_summary_text(node: ContainerNode) -> str:
+            assert isinstance(node, ContainerNode)
+            return TreePrinter.ContainerPrinter.generate_summary_text(node)
+        
+        @staticmethod
+        def print_summary(node: ContainerNode):
+            assert isinstance(node, ContainerNode)
+            print(TreePrinter.ContainerPrinter.get_summary_text(node))
+
+        @staticmethod
+        def generate_summary_text(target: ContainerNode) -> str:
+            assert isinstance(target, ContainerNode)
+            return f"Container: (ID={target.id}) {target.name} (Level: {target.level}, Position: {target.pos}, Is Last: {target.is_last()}"
 
         @staticmethod
         def get_structure_text(node: ContainerNode) -> str:
@@ -163,7 +189,22 @@ class TreePrinter:
         @staticmethod
         def get_type() -> 'TreePrinter.Types':
             return TreePrinter.Types.NODE
+        
+        @staticmethod
+        def get_summary_text(node: Node) -> str:
+            assert isinstance(node, Node)
+            return TreePrinter.NodePrinter.generate_summary_text(node)
+        
+        @staticmethod
+        def print_summary(node: Node):
+            assert isinstance(node, Node)
+            print(TreePrinter.NodePrinter.get_summary_text(node))
 
+        @staticmethod
+        def generate_summary_text(target: Node) -> str:
+            assert isinstance(target, Node)
+            return f"Node: (ID={target.id}) {target.name} (Level: {target.level}, Position: {target.pos}, Is Last: {target.is_last()}"
+        
         @staticmethod
         def get_structure_text(node: Node) -> str:
             assert isinstance(node, Node)
@@ -178,7 +219,7 @@ class TreePrinter:
         def generate_structure_text(target: Node, indent='', is_last=True):
             connector = '└── ' if is_last else '├── '
             details = f"{indent}{connector}{target.pos}. {target.name}"
-            is_last_text = f"{'(Leaf)' if is_last else ''} \n"
+            is_last_text = f"{' (Leaf)' if is_last else ''} \n"
             details += PrinterHelper.add_style(is_last_text, PrinterHelper.Colors.ORANGE)
             return details + (indent + '\n'  if is_last else "") 
         
@@ -195,3 +236,60 @@ class TreePrinter:
             connector = '└── ' if is_last else '├── '
             details = f"{indent}{connector}{target.pos}. {target.name} {'(Leaf)' if is_last else ''} \n"
             return details
+    
+    @staticmethod
+    def print_structure(node: Union['ContainerNode', 'Node']):
+        assert isinstance(node, (ContainerNode, Node))
+        if isinstance(node, ContainerNode):
+            TreePrinter.ContainerPrinter.print_structure(node)
+        else:
+            TreePrinter.NodePrinter.print_structure(node)
+
+    @staticmethod
+    def print_detailed(node: Union['ContainerNode', 'Node']):
+        assert isinstance(node, (ContainerNode, Node))
+        if isinstance(node, ContainerNode):
+            TreePrinter.ContainerPrinter.print_detailed(node)
+        else:
+            TreePrinter.NodePrinter.print_detailed(node)
+
+    @staticmethod
+    def print_summary(node: Union['ContainerNode', 'Node']):
+        assert isinstance(node, (ContainerNode, Node))
+        if isinstance(node, ContainerNode):
+            TreePrinter.ContainerPrinter.print_summary(node)
+        else:
+            TreePrinter.NodePrinter.print_summary(node)
+
+    @staticmethod
+    def get_structure_text(node: Union['ContainerNode', 'Node']) -> str:
+        assert isinstance(node, (ContainerNode, Node))
+        if isinstance(node, ContainerNode):
+            return TreePrinter.ContainerPrinter.get_structure_text(node)
+        else:
+            return TreePrinter.NodePrinter.get_structure_text(node)
+        
+    @staticmethod
+    def get_detailed_text(node: Union['ContainerNode', 'Node']) -> str:
+        assert isinstance(node, (ContainerNode, Node))
+        if isinstance(node, ContainerNode):
+            return TreePrinter.ContainerPrinter.get_detailed_text(node)
+        else:
+            return TreePrinter.NodePrinter.get_detailed_text(node)
+        
+    @staticmethod
+    def get_summary_text(node: Union['ContainerNode', 'Node']) -> str:
+        assert isinstance(node, (ContainerNode, Node))
+        if isinstance(node, ContainerNode):
+            return TreePrinter.ContainerPrinter.get_summary_text(node)
+        else:
+            return TreePrinter.NodePrinter.get_summary_text(node)
+
+    @staticmethod
+    def print(node: Union['ContainerNode', 'Node'], format: Literal['TreePrinter.Formats']):
+        if format == TreePrinter.Formats.STRUCTURE:
+            TreePrinter.print_structure(node)
+        elif format == TreePrinter.Formats.DETAILS:
+            TreePrinter.print_detailed(node)
+        else:
+            TreePrinter.print_summary(node)

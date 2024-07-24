@@ -531,6 +531,20 @@ class Tree:
     def append(self, node: Union['Node', 'ContainerNode']):
         self.base_dir.children.append(node)
 
+    def collect(self, level:int) -> List[Union['Node', 'ContainerNode']]:
+        
+        def collect_nodes(node, current_level):
+            if current_level == level:
+                level_nodes.append(node)
+            if isinstance(node, ContainerNode):
+                for child in node.children:
+                    collect_nodes(child, current_level + 1)
+
+        level_nodes = []
+        collect_nodes(self.base_dir, 0)
+        return level_nodes
+        
+
     def print_tree(self, node: Union['Node', 'ContainerNode'], indent=""):
         tree_str = indent + str(node) + "\n"
         if isinstance(node, ContainerNode):

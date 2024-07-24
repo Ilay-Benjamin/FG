@@ -16,24 +16,29 @@ from typing import Union, List, Iterable, Dict
 def run():
     
 
-    base_dir = TreeExample.get_base_dir()
+    tree = TreeExample.get_tree()
+    base_dir = tree.base_dir
     
     env_file = base_dir.get('env')
 
-    print(str(base_dir.to_structure_string()))
+    level_index = 4;
+    level_group = tree.collect(level_index) 
 
     print('')
     
     print(str(TreePrinter.ContainerPrinter.get_structure_text(base_dir)))
 
     print('')
-    
 
-    print('base_dir - TYPE :    ', type(base_dir))
-    
+    print(str(TreePrinter.print(base_dir, TreePrinter.Formats.SUMMARY)))
+
     print('')
 
-    print('base_dir - TYPE :    ', type(env_file))
+    print(str(TreePrinter.print_summary(env_file)))
+    
+    print('')
+    
+    print(len(level_group))
     
     print('')
     
