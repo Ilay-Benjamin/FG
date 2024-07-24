@@ -6,7 +6,7 @@ import pathlib
 from abc import ABC, abstractmethod
 from utils.helpers import CLIUtils, PathUtils
 from models.abstractGenerator import AbstarctGenerator
-from models.tree2 import ContainerNode, Node, Tree, TreeData
+from models.tree2 import ContainerNode, Node, Tree, TreeData, NodeRegistry
 from typing import Union, List, Iterable, Dict
 
 
@@ -63,7 +63,19 @@ def run():
 
     print('')
     
-    print(str(base_dir.children))
+    #print(str(base_dir.children))
+
+    print('')
+
+    print(tree1_data.print_matrix())
+
+    print('')
+
+    all_nodes = NodeRegistry.get_all()
+    for node in all_nodes:
+        print(node.__str__())
+
+    print('')
 
     print('')
 

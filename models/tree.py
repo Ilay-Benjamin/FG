@@ -93,7 +93,6 @@ class StructNode:
     def has_parent(self):
         return self.parent is not None
     
-    def is_root(self):
         return self.level == 0
 
     def is_exists(self):

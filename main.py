@@ -6,7 +6,7 @@ import pathlib
 from abc import ABC, abstractmethod
 from utils.helpers import CLIUtils, PathUtils 
 from models.builder import Builder
-from tests.create_tree1.test import run
+from tests.create_tree2.test import run
 
 
 

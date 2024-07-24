@@ -21,6 +21,8 @@ class PrinterData:
         WHITE = 'white',
         BLACK = 'black',
         GRAY = 'gray',
+        LIGHT_RED = 'light_red',
+        ORANGE = 'orange',
         END = 'end'
 
         @staticmethod
@@ -36,6 +38,8 @@ class PrinterData:
                 PrinterData.Colors.BLACK: '\033[30m',
                 PrinterData.Colors.GRAY: '\033[90m',
                 PrinterData.Colors.END: '\033[0m',
+                PrinterData.Colors.LIGHT_RED: '\033[31m',
+                PrinterData.Colors.ORANGE: '\033[33m',
             }
             return values
         

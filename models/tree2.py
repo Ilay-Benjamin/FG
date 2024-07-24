@@ -12,6 +12,64 @@ from enum import Enum
 
 
 
+# <--------------------------- NodeRegistry ---------------------------->  
+# <--------------------------- NodeRegistry ---------------------------->  
+
+class NodeRegistry:
+    __nodes__: List[Union['Node', 'ContainerNode']]= []
+
+    @staticmethod
+    def register(node:Union['Node', 'ContainerNode']):
+        NodeRegistry.__nodes__.append(node)
+        return len(NodeRegistry.__nodes__) - 1
+
+    @staticmethod
+    def get(name:str)->Union[None, 'Node', 'ContainerNode']:
+        for node in NodeRegistry.__nodes__:
+            assert isinstance(node, Node) or isinstance(node, ContainerNode)
+            if node.name == name:
+                return node
+        return None
+    
+    @staticmethod
+    def find(name:str)->Union[None, 'Node', 'ContainerNode']:
+        for node in NodeRegistry.__nodes__:
+            assert isinstance(node, Node) or isinstance(node, ContainerNode)
+            if node.name == name:
+                return node
+        return None
+
+    @staticmethod
+    def get_all():
+        return NodeRegistry.__nodes__
+    
+    @staticmethod
+    def count():
+        return len(NodeRegistry.__nodes__)
+    
+    @staticmethod
+    def contains(node:Union['Node', 'ContainerNode', str]):
+        if isinstance(node, str):
+            return node in [child.name for child in NodeRegistry.__nodes__]
+        return node.name in [child.name for child in NodeRegistry.__nodes__]
+    
+    @staticmethod
+    def is_empty():
+        return len(NodeRegistry.__nodes__) > 0
+    
+    @staticmethod
+    def get_max_depth():
+        depth = 0
+        for node in NodeRegistry.__nodes__:
+            if node.is_container():
+                depth = max(depth, node.get_max_depth())
+        return depth
+    
+
+
+# <--------------------------- NodeInterface ---------------------------->
+# <--------------------------- NodeInterface ---------------------------->
+
 class NodeInterface(ABC):
     
     @staticmethod
@@ -29,6 +87,9 @@ class NodeInterface(ABC):
         pass
 
 
+
+# <--------------------------- StructNode ---------------------------->
+# <--------------------------- StructNode ---------------------------->
 
 class StructNode(NodeInterface):
 
@@ -78,6 +139,9 @@ class StructNode(NodeInterface):
 
 
 
+# <--------------------------- BasicNode ---------------------------->
+# <--------------------------- BasicNode ---------------------------->
+
 class BasicNode(StructNode):
 
     @staticmethod
@@ -108,20 +172,23 @@ class BasicNode(StructNode):
     
 
 
+# <--------------------------- Node ---------------------------->
+# <--------------------------- Node ---------------------------->
+
 class Node(BasicNode):
 
     @staticmethod
-    @property
-    def capable(self) -> bool:
+    def capable() -> bool:
         return False
     
     def is_container(self) -> bool:
-        return Node.capable
+        return Node.capable()
 
     def __init__(self, name:str, parent:Union[None, 'ContainerNode']=None):
         super().__init__(name, parent)
         self.parent: Union[None, 'ContainerNode'] = parent
         self._load(parent)
+        self.id = NodeRegistry.register(self)
 
     def _load(self, parent:Union[None, 'ContainerNode']):
         if parent:
@@ -156,42 +223,73 @@ class Node(BasicNode):
             return self.parent.last() == self
 
     def __str__(self):
-        return f"File: {self.name} (Level: {self.level}, Position: {self.pos}, Is Last: {self.is_last})"
+        return f"File: (ID={self.id}) {self.name} (Level: {self.level}, Position: {self.pos}, Is Last: {self.is_last()})"
     
     def to_detailed_string(self, indent='', is_last=True):
         connector = '└── ' if is_last else '├── '
         details = f"{indent}{connector}{self.pos}. {self.name} {'(Leaf)' if is_last else ''} \n"
         return details
-    
 
+    def to_structure_string(self, indent='', is_last=True):
+        connector = '└── ' if is_last else '├── '
+        details = f"{indent}{connector}{self.pos}. {self.name}"
+        is_last_text = f"{'(Leaf)' if is_last else ''} \n"
+        details += PrinterHelper.add_style(is_last_text, PrinterHelper.Colors.ORANGE)
+        return details + (indent + '\n'  if is_last else "") 
+
+
+
+# <--------------------------- ContainerNode ---------------------------->                                                                      
+# <--------------------------- ContainerNode ---------------------------->                                                                      
 
 class ContainerNode(BasicNode):
-    
+    """
+    Represents a container node in a tree structure.
+    """
+
     @staticmethod
-    @property
-    def capable(self) -> bool:
+    def capable() -> bool:
+        """
+        Returns whether the container is capable or not.
+        """
         return True
     
     def is_container(self) -> bool:
-        return ContainerNode.capable
+        """
+        Checks if the node is a container.
+        """
+        return ContainerNode.capable()
     
     @staticmethod
     def _load_root(root: 'ContainerNode'):
+        """
+        Loads the root node of the container.
+        """
         StructNode._load_root(root)
         root.children = []
 
     @staticmethod
     def _create_root(name: str) -> 'ContainerNode':
+        """
+        Creates a new root node for the container.
+        """
         root = ContainerNode(name)
         ContainerNode._load_root(root)
         return root
 
     def __init__(self, name: str, parent:Union[None, 'ContainerNode']=None):
+        """
+        Initializes a new instance of the ContainerNode class.
+        """
         self.children: List[Union['Node', 'ContainerNode']] = []
         super().__init__(name, parent)
         self._load(parent)
+        self.id = NodeRegistry.register(self)
 
     def _load(self, parent:Union[None, 'ContainerNode']):
+        """
+        Loads the container node with the specified parent.
+        """
         if parent:
             self.move(parent)
         else:
@@ -201,6 +299,9 @@ class ContainerNode(BasicNode):
             self.pos = -1
 
     def move(self, new_parent:Union[None, 'ContainerNode']):
+        """
+        Moves the container node to a new parent.
+        """
         if self.parent:
             assert isinstance(self.parent, ContainerNode)
             self.parent.remove(self)
@@ -209,32 +310,60 @@ class ContainerNode(BasicNode):
             child.reload_all()
 
     def get_max_depth(self, depth:int=0)->int:
+        """
+        Returns the maximum depth of the container node.
+        """
         for child in self.children:
             if child.is_container():
                 depth = max(depth, child.get_max_depth(depth + 1))            
 
     def contains(self, node:Union['Node', 'ContainerNode', str]):
+        """
+        Checks if the container node contains the specified node.
+        """
         if isinstance(node, str):
             return node in [child.name for child in self.children]
         return node.name in [child.name for child in self.children]
     
     def is_empty(self):
-        return len(self.children) > 0
+        """
+        Checks if the container node is empty.
+        """
+        return len(self.children) < 0
     
-    def count(self):
+    def count(self, deep_search=False):
+        """
+        Returns the number of children in the container node.
+        """
+        if deep_search:
+            count = 0
+            for child in self.children:
+                count += 1
+                if child.is_container():
+                    count += child.count(True)
+            return count
         return len(self.children)
     
     def get(self, name:str):
+        """
+        Returns the child node with the specified name.
+        """
         if self.contains(name):
             return [child for child in self.children if child.name == name][0]
         return None
 
     def find(self, index:int):
+        """
+        Finds the child node at the specified index.
+        """
         if index < 0 or index >= len(self.children):
             return None
         return self.children[index]
 
     def pos_of(self, node:Union['Node', 'ContainerNode', str])->int:
+        """
+        Returns the position of the specified node in the container.
+        """
         if not self.contains(node):
             return -10
         if isinstance(node, str):
@@ -248,27 +377,52 @@ class ContainerNode(BasicNode):
         return -5
     
     def last(self):
+        """
+        Returns the last child node in the container.
+        """
         return self.children[len(self.children) - 1]
-
-    def is_last(self, node:Union['Node', 'ContainerNode', str])->bool:
+    
+    def check_last(self, node:Union['Node', 'ContainerNode', str]):
+        """
+        Checks if the specified node is the last child in the container.
+        """
         if not self.contains(node):
             return False
         if isinstance(node, str):
             return self.children[len(self.children) - 1].name == node
         return self.children[len(self.children) - 1].name == node.name
 
+    def is_last(self) -> bool:
+        """
+        Checks if the container node is the last child of its parent.
+        """
+        if self.parent:
+            return self.parent.last() == self
+        
+    
+
     def append(self, node:Union['Node', 'ContainerNode']):
+        """
+        Appends a child node to the container.
+        """
         self.children.append(node)
         node.parent = self
         self.reload_all()
 
+
     def remove(self, node:Union['Node', 'ContainerNode']):
+        """
+        Removes a child node from the container.
+        """
         self.children.remove(node)
         node.parent = None
         node.reload()
         self.reload_all()
 
     def reload(self):
+        """
+        Reloads the container node.
+        """
         if self.parent:
             assert isinstance(self.parent, ContainerNode)
             self.parent: ContainerNode = self.parent
@@ -282,6 +436,9 @@ class ContainerNode(BasicNode):
             self.pos = -1
             
     def reload_children(self, only_direct=False):
+        """
+        Reloads the children of the container node.
+        """
         if only_direct:
             for idx, child in enumerate(self.children):
                 child.reload()
@@ -292,18 +449,52 @@ class ContainerNode(BasicNode):
                     child.reload_children()
     
     def reload_all(self):
+        """
+        Reloads the container node and its children.
+        """
         self.reload()
         self.reload_children()
 
+
     def __str__(self):
-        return f"Directory: {self.name} (Level: {self.level}, Position: {self.pos}, Is Last: {self.parent.is_last(self) if self.parent else 'None'})"
+        """
+        Returns a string representation of the container node.
+        """
+        return f"Directory: (ID={self.id}) {self.name} (Level: {self.level}, Position: {self.pos}, Is Last: {self.parent.is_last(self) if self.parent else 'None'})"
     
-    def to_detailed_string(self, indent='', is_last=True):
+    def to_structure_string(self, indent='', is_last=True):
+        """
+        Returns a string representation of the container node.
+        """
+        connector = '└── ' if is_last else '├── '
+        child_indent = indent + ('    ' if is_last else '│   ') 
+        result = PrinterHelper.add_style(f"{indent}{connector}" 
+                                        f"{self.pos}. {self.name}/", 
+                                        [PrinterHelper.Formats.BOLD, 
+                                        PrinterHelper.Colors.CYAN])
+        result += PrinterHelper.add_style((" (Leaf)" if is_last else ""), 
+                                        PrinterHelper.Colors.ORANGE) + '\n' + child_indent + '│   ' + '\n' 
+        if not self.is_empty():
+            for index, child in enumerate(self.children):
+                is_last_child = index == len(self.children) - 1
+                result += child.to_structure_string(child_indent, is_last_child)
+        else:
+            if is_last:
+                result += child_indent + '    \n'
+            else:
+                result += child_indent + '│   \n'
+        return result
+
+    def to_detailed_string(self, indent='', is_last=True, ):
+        """
+        Returns a detailed string representation of the container node.
+        """
         connector = '└── ' if is_last else '├── '
         child_indent = indent + ('    ' if is_last else '│   ') 
         head_text = '\n'
         head_text += PrinterHelper.add_style(f"{indent}{connector}" f"{self.pos}. {self.name}", [PrinterHelper.Formats.BOLD, PrinterHelper.Colors.CYAN])
         head_text += PrinterHelper.add_style((" (Leaf)" if is_last else ""), PrinterHelper.Colors.BLUE)
+        details = []
         details = [
             child_indent + head_text,
             child_indent + PrinterHelper.add_style(f"  ~ Path: {self.path}", PrinterHelper.Colors.GRAY),
@@ -312,10 +503,10 @@ class ContainerNode(BasicNode):
             child_indent + PrinterHelper.add_style(f"  ~ Children: {self.count() if self.is_empty() else 'None'}", PrinterHelper.Colors.GRAY),
         ]
         result = ("\n").join(details) + "\n"
-        if self.is_empty():
+        if not self.is_empty():
             for index, child in enumerate(self.children):
                 is_last_child = index == len(self.children) - 1
-                if child.is_last:
+                if child.is_last():
                     result += child_indent + '│    \n'
                 result += child.to_detailed_string(child_indent, is_last_child)
         else:
@@ -323,8 +514,12 @@ class ContainerNode(BasicNode):
                 result += child_indent + '    \n'
             else:
                 result += child_indent + '│    \n'
-        return result 
+        return result
 
+
+
+# <--------------------------- Tree ---------------------------->
+# <--------------------------- Tree ---------------------------->
 
 class Tree:
     def __init__(self, base_dir:ContainerNode):
@@ -350,6 +545,9 @@ class Tree:
     
 
 
+# <--------------------------- TreeData ---------------------------->
+# <--------------------------- TreeData ---------------------------->
+
 class TreeData:
     def __init__(self, tree:Tree):
         self.tree = tree
@@ -364,7 +562,8 @@ class TreeData:
         while len(self.matrix) <= row:
             self.matrix.append([])
         while len(self.matrix[row]) <= col:
-            self.matrix[row].append(None)
+            continer: ContainerNode = self.matrix[row]
+            continer.append(None)
         self.matrix[row][col] = node
         if isinstance(node, ContainerNode) and node.is_empty():
             for idx, child in enumerate(node.children):
@@ -373,5 +572,12 @@ class TreeData:
     def print_matrix(self):
         for row in self.matrix:
             for node in row:
-                assert isinstance(node, Node) or isinstance(node, ContainerNode)
-                print (node.name if node else None)                 
+                if isinstance(node, Node): 
+                    assert isinstance(node, Node)
+                    print(node.name if node else None)
+                elif isinstance(node, ContainerNode):
+                    assert isinstance(node, ContainerNode)
+                    print(node.name if node else None)
+                    for child in node.children:
+                        print(child.name if child else None)
+
