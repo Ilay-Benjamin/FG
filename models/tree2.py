@@ -97,7 +97,7 @@ class StructNode(NodeInterface):
     @staticmethod
     def _load_root(root: 'StructNode'):
         root.level = 0
-        root.path = root.name
+        root.path = "\\" + root.name
         root.parent = None
 
     @staticmethod
@@ -117,11 +117,15 @@ class StructNode(NodeInterface):
         if parent:
             self.parent = parent
             self.level = parent.level + 1
-            self.path = parent.path + "/" + self.name
+            self.path = os.path.join(parent.path, self.name)
+        elif self.is_root():
+            self.path = "\\" + self.name
+            self.level = 0
+            self.pos = 0
         else:
             self.parent = None
             self.level = -1
-            self.path = self.name
+            self.path = '\\' + self.name
 
     def has_parent(self):
         return self.parent is not None
@@ -149,6 +153,7 @@ class BasicNode(StructNode):
     def _load_root(root: 'BasicNode'):
         StructNode._load_root(root)
         root.pos = 0
+        
     
     @staticmethod
     def _create_root(name: str) -> 'BasicNode':
@@ -196,7 +201,7 @@ class Node(BasicNode):
             self.move(parent)
         else:
             self.parent = None
-            self.path = self.name
+            self.path = '\\' + self.name
             self.level = -1
             self.pos = -1
 
@@ -210,9 +215,13 @@ class Node(BasicNode):
     def reload(self):
         if self.parent:
             self.parent: ContainerNode = self.parent
-            self.path = self.parent.path + "/" + self.name
+            self.path = os.path.join(self.parent.path, self.name)
             self.level = self.parent.level + 1
             self.pos = self.parent.pos_of(self)
+        elif self.is_root():
+            self.path = "\\" + self.name
+            self.level = 0
+            self.pos = 0
         else:
             self.parent = None
             self.path = self.name
@@ -295,7 +304,7 @@ class ContainerNode(BasicNode):
             self.move(parent)
         else:
             self.parent = None
-            self.path = self.name
+            self.path = '\\' + self.name
             self.level = -1
             self.pos = -1
 
@@ -354,13 +363,46 @@ class ContainerNode(BasicNode):
             return [child for child in self.children if child.name == name][0]
         return None
 
-    def find(self, index:int):
+    def at(self, index:int):
         """
         Finds the child node at the specified index.
         """
         if index < 0 or index >= len(self.children):
             return None
         return self.children[index]
+
+    def search(self, path:str):
+        """
+        Searches for a child node with the specified path.
+        """
+        path = path.replace("\\", "/")
+        if path.startswith("./"):
+            if self.is_root():
+                current = self
+                path_parts = path.split("/")[1:]
+            else:
+                return None
+        else:
+            current = self
+            path_parts = path.split("/")
+        for part in path_parts:
+            if part == "..":
+                if current.parent:
+                    current = current.parent
+                else:
+                    return None
+            elif part == ".":
+                continue
+            else:
+                found = False
+                for child in current.children:
+                    if child.name == part:
+                        current = child
+                        found = True
+                        break
+                if not found:
+                    return None
+        return current
 
     def pos_of(self, node:Union['Node', 'ContainerNode', str])->int:
         """
@@ -428,12 +470,16 @@ class ContainerNode(BasicNode):
         if self.parent:
             assert isinstance(self.parent, ContainerNode)
             self.parent: ContainerNode = self.parent
-            self.path = self.parent.path + "/" + self.name
+            self.path = os.path.join(self.parent.path, self.name)
             self.level = self.parent.level + 1
             self.pos = self.parent.pos_of(self.name)
+        elif self.is_root():
+            self.path = "\\" + self.name
+            self.level = 0
+            self.pos = 0
         else:
             self.parent = None
-            self.path = self.name
+            self.path = '\\' + self.name
             self.level = -1
             self.pos = -1
             
@@ -462,7 +508,7 @@ class ContainerNode(BasicNode):
         """
         Returns a string representation of the container node.
         """
-        return f"Directory: (ID={self.id}) {self.name} (Level: {self.level}, Position: {self.pos}, Is Last: {self.parent.is_last(self) if self.parent else 'None'})"
+        return f"Directory: (ID={self.id}) {self.name} (Level: {self.level}, Position: {self.pos}, Is Last: {self.parent.is_last() if self.parent else 'None'})"
 
     def to_structure_string(self, indent='', is_last=True):
         """
@@ -530,40 +576,86 @@ class Tree:
 
     def append(self, node: Union['Node', 'ContainerNode']):
         self.base_dir.children.append(node)
-
+    
     def collect(self, level:int) -> List[Union['Node', 'ContainerNode']]:
-        
         def collect_nodes(node, current_level):
             if current_level == level:
                 level_nodes.append(node)
             if isinstance(node, ContainerNode):
-                for child in node.children:
+                for child in node.children: 
                     collect_nodes(child, current_level + 1)
-
-        level_nodes = []
+        level_nodes: List[Union['Node', 'ContainerNode']] = []
         collect_nodes(self.base_dir, 0)
         return level_nodes
-        
+    
+    
+    def get_by_cords(self, cords:dict['level':int, 'position':int]):
+        def find_node(node: Union['Node', 'ContainerNode'], cords:dict['level':int, 'position':int]):
+            if node.level == cords['level'] and node.pos == cords['position']:
+                return node
+            if isinstance(node, ContainerNode):
+                for child in node.children:
+                    result = find_node(child, cords)
+                    if result:
+                        return result
+            return None
+        return find_node(self.base_dir, cords)
 
-    def print_tree(self, node: Union['Node', 'ContainerNode'], indent=""):
+    def get_by_path(self, path: str):
+        return self.base_dir.search(path)
+        
+    def get_by_id(self, id:int):
+        def find_node(node: Union['Node', 'ContainerNode'], id):
+            if node.id == id:
+                return node
+            if isinstance(node, ContainerNode):
+                for child in node.children:
+                    result = find_node(child, id)
+                    if result:
+                        return result
+            return None
+        return find_node(self.base_dir, id)
+
+
+    def get(self, identifier:Union[str, List[str], int, List[int], dict['level':int, 'position':int], List[dict['level':int, 'position':int]]]) -> Union[None, 'Node', 'ContainerNode', List[Union['Node', 'ContainerNode']]]:
+        if isinstance(identifier, str):
+            return self.get_by_path(identifier)
+        if isinstance(identifier, int):
+            return self.get_by_id(identifier)
+        if isinstance(identifier, dict):
+            return self.get_by_cords(identifier)
+        if isinstance(identifier, list):
+            results = []
+            for current_identifier in identifier:
+                result = self.get(current_identifier)
+                if result:
+                    results.append(result)
+            return results
+        return None
+
+        
+    def print(self, node: Union['Node', 'ContainerNode'], indent=""):
         tree_str = indent + str(node) + "\n"
         if isinstance(node, ContainerNode):
             for child in node.children:
-                tree_str += self.print_tree(child, indent + "    ")
+                tree_str += self.print(child, indent + "    ")
         return tree_str
     
     def to_detailed_string(self):
         return self.base_dir.to_detailed_string()
 
     def __str__(self):
-        return self.print_tree(self.base_dir)
+        return self.print(self.base_dir)
     
 
 
 # <--------------------------- TreeData ---------------------------->
 # <--------------------------- TreeData ---------------------------->
 
+
+
 class TreeData:
+
     def __init__(self, tree:Tree):
         self.tree = tree
         self.matrix = []

@@ -118,4 +118,9 @@ class PrinterHelper:
                 new_text += PrinterHelper.Formats.get(addition)
         new_text += text + end_text
         return new_text
-        
+
+    @staticmethod 
+    def print(text: str, style:Union[PrinterData.Formats, List[PrinterData.Formats], PrinterData.Colors, List[PrinterData.Colors], List[Union[PrinterData.Colors, PrinterData.Formats]]]):
+        print (PrinterHelper.add_style(text, style))
+    
+    

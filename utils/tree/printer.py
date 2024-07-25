@@ -203,7 +203,7 @@ class TreePrinter:
         @staticmethod
         def generate_summary_text(target: Node) -> str:
             assert isinstance(target, Node)
-            return f"Node: (ID={target.id}) {target.name} (Level: {target.level}, Position: {target.pos}, Is Last: {target.is_last()}"
+            return f"Node: (ID={target.name})AEDFG {target.name} (Level: {target.level}, Position: {target.pos}, Is Last: {target.is_last()}"
         
         @staticmethod
         def get_structure_text(node: Node) -> str:
