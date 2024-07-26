@@ -1,0 +1,162 @@
+
+
+# <--------------------------- TreeData ---------------------------->
+# <--------------------------- TreeData ---------------------------->
+
+
+#
+#class TreeData:
+#    
+#
+## <--------------------------- IndexValidator ---------------------------->                                                                      
+## <--------------------------- IndexValidator ---------------------------->                                                                      
+#
+#    class IndexValidator:
+#        @staticmethod
+#        def validate(value, index:int):
+#            pass
+#
+#        
+#        @staticmethod
+#        def __validate_range__(treeData: 'TreeData', 
+#                                level:int, position:int = -1) -> bool:
+#            
+#            def is_within_range(value: int, range: range) -> bool:
+#                return value >= range.start and value < range.stop
+#            
+#            if position == -1:
+#                return is_within_range(level, range(0, treeData.depth()))
+#            return is_within_range(level, range(0, treeData.depth())) and is_within_range(position, range(0, treeData.length(level)))
+#
+#
+#        @staticmethod
+#        def __check__(treeData: 'TreeData', index:Union[int, dict], type:Literal['TreeData.IndexType']) -> bool:
+#            if type == TreeData.IndexType.LEVEL:
+#                return TreeData.IndexValidator.__validate_type_valid__(index, 'TreeData.IndexType.LEVEL)')
+#            if type == TreeData.IndexType.POSITION:
+#                return (
+#                    TreeData.IndexValidator.__check__(treeData, index, 'TreeData.IndexType.LEVEL)')
+#                    and TreeData.IndexValidator.__validate_type_valid__(index, 'TreeData.IndexType.POSITION)')
+#                    and TreeData.IndexValidator.__validate_range__(treeData, index)
+#                )
+#            if type == TreeData.IndexType.CORDS:
+#                return (
+#                    TreeData.IndexValidator.__validate_type_valid__(index, 'TreeData.IndexType.CORDS)')
+#                    and (TreeData.IndexValidator.__validate_range__(treeData, index.get('level'), index.get('position')))
+#                    
+#                )
+#            
+#
+#        @staticmethod
+#        def is_valid(treeData: 'TreeData', index:Union[int, dict], type:Literal['TreeData.IndexType']) -> bool:
+#            return TreeData.IndexValidator.__check__(treeData, index, type)
+#        
+#        
+## <--------------------------- __IndexInterface__ ---------------------------->  
+## <--------------------------- __IndexInterface__ ---------------------------->  
+#                                                                     
+#    class __IndexInterface__(ABC):
+#
+#        @staticmethod
+#        @abstractmethod
+#        def valtype() -> 'TreeData.IndexType':
+#            pass
+#
+#        @abstractmethod
+#        def get(self, treeData: 'TreeData') -> Union[int, dict]:
+#            pass
+#
+#
+#        @abstractmethod
+#        def is_valid(self, treeData: 'TreeData') -> bool:
+#            pass
+#
+#        @abstractmethod
+#        def __str__(self) -> str:
+#            pass
+#
+#
+## <--------------------------- IndexType ---------------------------->                                                                      
+## <--------------------------- IndexType ---------------------------->                                                                      
+#
+#    class IndexType(Enum):
+#        LEVEL = "level"
+#        POSITION = "position"
+#        CORDS = "cords"
+#
+#        @staticmethod
+#        def __data_types__() -> List[type]:
+#            data_types = {
+#                TreeData.IndexType.LEVEL: int,
+#                TreeData.IndexType.POSITION: int,
+#                TreeData.IndexType.CORDS: Dict[str, int]
+#            }
+#            return data_types-[]
+#
+#        @staticmethod
+#        def get(type:Literal['TreeData.IndexType']):
+#                return TreeData.IndexType.__data_types__()[type]
+#        
+#        @staticmethod
+#        def is_exists(type:Literal['TreeData.IndexType']):
+#            return type in TreeData.IndexType.__members__
+#        
+#        class I
+#
+#        @staticmethod
+#        def __validate_data_type__(value: Union[int, dict], 
+#                                type:Literal['TreeData.IndexType']) -> bool:
+#            if type == TreeData.IndexType.LEVEL:
+#                return isinstance(value, int)
+#            if type == TreeData.IndexType.POSITION:
+#                return isinstance(value, int)
+#            if type == TreeData.IndexType.CORDS:
+#                return (isinstance(value, dict) 
+#                    and (TreeData.IndexValidator.__validate_type_valid__(value.get('level'), TreeData.IndexType.LEVEL))
+#                    and (TreeData.IndexValidator.__validate_type_valid__(value.get('position'), TreeData.IndexType.POSITION)))
+#            return False
+#        
+#    
+#    @staticmethod
+#    def build(tree:Tree):
+#        td = TreeData(tree)
+#        td.__build__(tree)
+#        return td
+#
+#    def __init__(self, tree:Tree):
+#        self.levels: List[List[Union['Node', 'ContainerNode']]] = []
+#        self.__build__(tree)
+#
+#    def __build__(self, tree:Tree):
+#        for i in range(tree.depth()):
+#            self.levels.append(tree.collect(i)) 
+#
+#    def __str__(self):
+#        value = "[\n"
+#        for level in self.levels:
+#            value += "[ "
+#            for node in level:
+#                value += node.name + ", "
+#            value += " ],\n"
+#        value += "]"
+#        return value
+#    
+#    def print(self):
+#        print(self.__str__())
+#
+#    def depth(self):
+#        return len(self.levels)
+#    
+#    def length(self, level:int):
+#        return len(self.levels[level])
+#
+#    def get(self, level:int, position: int=-1):
+#        if position == -1:
+#            return self.__get_level__(level)
+#        return self.levels[level][position]
+#            
+#    def __get_level__(self, level:int) -> List[Union['Node', 'ContainerNode']]: 
+#        return self.levels[level]
+#    
+#    def __get_node__(self, level:int, position:int) -> Union['Node', 'ContainerNode']:
+#        return self.levels[level][position]

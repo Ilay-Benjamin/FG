@@ -205,6 +205,9 @@ class Node(BasicNode):
             self.level = -1
             self.pos = -1
 
+    def is_leaf(self):
+        return True
+
     def move(self, new_parent:Union[None, 'ContainerNode']):
         if self.parent:
             assert isinstance(self.parent, ContainerNode)
@@ -308,6 +311,27 @@ class ContainerNode(BasicNode):
             self.level = -1
             self.pos = -1
 
+    def is_leaf(self):
+        if(self.is_empty()):
+            return True
+        return False
+
+    def get_depth(self, d:int=0)-> int:
+        if self.is_leaf():
+            if self.level > d:
+                d = self.level  
+            return d
+        for child in self.children:
+            if child.is_container() and child.count() > 0:
+                d = child.get_depth(d)
+                if child.level > d:
+                    d = child.level
+            else:
+                if child.level > d:
+                    d = child.level
+        return d
+                
+
     def move(self, new_parent:Union[None, 'ContainerNode']):
         """
         Moves the container node to a new parent.
@@ -326,7 +350,8 @@ class ContainerNode(BasicNode):
         for child in self.children:
             print(child.name + " " + str(child.is_container()))
             if isinstance(child, ContainerNode):
-                depth = max(depth, child.get_max_depth(depth + 1))            
+                depth = max(depth, child.get_max_depth(depth + 1))       
+                return 0     
 
     def contains(self, node:Union['Node', 'ContainerNode', str]):
         """
@@ -566,7 +591,6 @@ class ContainerNode(BasicNode):
 
 
 
-
 # <--------------------------- Tree ---------------------------->
 # <--------------------------- Tree ---------------------------->
 
@@ -616,7 +640,6 @@ class Tree:
             return None
         return find_node(self.base_dir, id)
 
-
     def get(self, identifier:Union[str, List[str], int, List[int], dict['level':int, 'position':int], List[dict['level':int, 'position':int]]]) -> Union[None, 'Node', 'ContainerNode', List[Union['Node', 'ContainerNode']]]:
         if isinstance(identifier, str):
             return self.get_by_path(identifier)
@@ -632,54 +655,61 @@ class Tree:
                     results.append(result)
             return results
         return None
-
-        
-    def print(self, node: Union['Node', 'ContainerNode'], indent=""):
-        tree_str = indent + str(node) + "\n"
-        if isinstance(node, ContainerNode):
-            for child in node.children:
-                tree_str += self.print(child, indent + "    ")
-        return tree_str
+    
+    def depth(self):
+        return self.base_dir.get_depth()
     
     def to_detailed_string(self):
         return self.base_dir.to_detailed_string()
 
-    def __str__(self):
-        return self.print(self.base_dir)
-    
 
 
 # <--------------------------- TreeData ---------------------------->
 # <--------------------------- TreeData ---------------------------->
-
 
 
 class TreeData:
+    
+    @staticmethod
+    def build(tree:Tree):
+        td = TreeData(tree)
+        td.__build__(tree)
+        return td
 
     def __init__(self, tree:Tree):
-        self.matrix = []
-        self.build_matrix(tree)
+        self.levels: List[List[Union['Node', 'ContainerNode']]] = []
+        self.__build__(tree)
 
-    def build_matrix(self, tree: Tree):
-        self.matrix = []
-        root = tree
-        max_depth = root.get_max_depth() + 1
-        for level in range(max_depth):
-            self.matrix.append([])
-        self.add_to_matrix(root, 0)
+    def __build__(self, tree:Tree):
+        for i in range(tree.depth()):
+            self.levels.append(tree.collect(i)) 
 
-    def add_to_matrix(self, node:Union['Node', 'ContainerNode'], level: int):
-        self.matrix[level].append(node)
-        if isinstance(node, ContainerNode):
-            for child in node.children:
-                self.add_to_matrix(child, level + 1)
+    def __str__(self):
+        value = "[\n"
+        for level in self.levels:
+            value += "[ "
+            for node in level:
+                value += node.name + ", "
+            value += " ],\n"
+        value += "]"
+        return value
+    
+    def print(self):
+        print(self.__str__())
 
-    def print_matrix(self):
-        for level, row in enumerate(self.matrix):
-            print(f"Level {level}: ", end="")
-            for node in row:
-                if isinstance(node, Node):
-                    print(node.name, end=" ")
-                elif isinstance(node, ContainerNode):
-                    print(node.name, end=" ")
-            print()
+    def depth(self):
+        return len(self.levels)
+    
+    def length(self, level:int):
+        return len(self.levels[level])
+
+    def get(self, level:int, position: int=-1):
+        if position == -1:
+            return self.__get_level__(level)
+        return self.levels[level][position]
+            
+    def __get_level__(self, level:int) -> List[Union['Node', 'ContainerNode']]: 
+        return self.levels[level]
+    
+    def __get_node__(self, level:int, position:int) -> Union['Node', 'ContainerNode']:
+        return self.levels[level][position]

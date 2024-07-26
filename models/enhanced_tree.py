@@ -10,7 +10,7 @@ from utils.tree.printer import TreePrinter
 from models.abstractGenerator import AbstarctGenerator
 from models.tree2 import ContainerNode, Node, Tree, TreeData, NodeRegistry
 from typing import Union, List, Iterable, Dict, Callable, Literal
-from enum import Enum
+from enum import Enum   
 
 
 
@@ -29,7 +29,6 @@ class EnhancedTree(Tree):
         def downgrade(tree: 'EnhancedTree') -> 'Tree':
             return Tree(tree.base_dir)
     
-
     class __TreeFactory__:
         @staticmethod
         def __create_new_tree__(base_dir: ContainerNode) -> 'EnhancedTree':
@@ -48,9 +47,7 @@ class EnhancedTree(Tree):
             else:
                 raise Exception('Invalid argument type')
             
-
     class __TreeSearch__():
-
         class __SearchTypes__(Enum):
             ID = 'ID',
             PATH = 'PATH',
@@ -59,17 +56,30 @@ class EnhancedTree(Tree):
             @staticmethod
             def is_exists(search_type: 'EnhancedTree.__TreeSearch__.__SearchTypes__'):
                 return search_type in EnhancedTree.__TreeSearch__.__SearchTypes__.__members__
+        
+        
+        @staticmethod
+        def __search__(tree: 'EnhancedTree',
+                    search_value: Union[str, dict['level':int, 'position':int], int]) -> Union['Node', 'ContainerNode']:
+            if isinstance(search_value, str):
+                return EnhancedTree.__TreeSearch__.__search_by_path__(tree, search_value)
+            elif isinstance(search_value, dict):
+                return EnhancedTree.__TreeSearch__.__search_by_cordinates__(tree, search_value)
+            elif isinstance(search_value, int):
+                return EnhancedTree.__TreeSearch__.__search_by_id__(tree, search_value)
+            else:
+                raise Exception('Invalid search value type')
 
         @staticmethod
-        def search_by_path(tree: 'EnhancedTree', path: str) -> Union['Node', 'ContainerNode']:
+        def __search_by_path__(tree: 'EnhancedTree', path: str) -> Union['Node', 'ContainerNode']:
             return EnhancedTree.__TreeSearch__.__search_by_path_handler__(tree, path)
 
         @staticmethod
-        def search_by_cordinates(tree: 'EnhancedTree', cordinates: dict['level':int, 'position':int]) -> Union['Node', 'ContainerNode']:
+        def __search_by_cordinates__(tree: 'EnhancedTree', cordinates: dict['level':int, 'position':int]) -> Union['Node', 'ContainerNode']:
             return EnhancedTree.__TreeSearch__.__search_by_cordinates_handler__(tree, cordinates)
         
         @staticmethod
-        def search_by_id(tree: 'EnhancedTree', id:int) -> Union['Node', 'ContainerNode']:        
+        def __search_by_id__(tree: 'EnhancedTree', id:int) -> Union['Node', 'ContainerNode']:        
             return EnhancedTree.__TreeSearch__.__search_by_id_handler__(tree, id)
 
         @staticmethod
@@ -83,7 +93,18 @@ class EnhancedTree(Tree):
         @staticmethod
         def __search_by_id_handler__(tree: 'EnhancedTree', id:int) -> Union['Node', 'ContainerNode']:        
             return tree.get_by_id(id)
-
+                
+        @staticmethod
+        def __search_by_type__(tree: 'EnhancedTree', search_type: Literal['EnhancedTree.SearchTypes'], 
+                search_value: Union[str, dict['level':int, 'position':int], int]) -> Union['Node', 'ContainerNode']:
+            if search_type == EnhancedTree.SearchTypes.ID:
+                return EnhancedTree.__TreeSearch__.__search_by_id__(tree, search_value)
+            elif search_type == EnhancedTree.SearchTypes.PATH:
+                return EnhancedTree.__TreeSearch__.__search_by_path__(tree, search_value)
+            elif search_type == EnhancedTree.SearchTypes.CORDINATES:
+                return EnhancedTree.__TreeSearch__.__search_by_cordinates__(tree, search_value)
+            else:  
+                raise Exception('Invalid search type')
 
         Types = __SearchTypes__
 
@@ -112,23 +133,11 @@ class EnhancedTree(Tree):
         self.base_dir.append(node, parent)
         return self
     
-    def __search_by_type__(self, search_type: Literal['EnhancedTree.SearchTypes'], 
-               search_value: Union[str, dict['level':int, 'position':int], int]) -> Union['Node', 'ContainerNode']:
-        if search_type == EnhancedTree.SearchTypes.ID:
-            return EnhancedTree.__TreeSearch__.search_by_id(self, search_value)
-        elif search_type == EnhancedTree.SearchTypes.PATH:
-            return EnhancedTree.__TreeSearch__.search_by_path(self, search_value)
-        elif search_type == EnhancedTree.SearchTypes.CORDINATES:
-            return EnhancedTree.__TreeSearch__.search_by_cordinates(self, search_value)
-        else:  
-            raise Exception('Invalid search type')
-        
+    def simplify(self):
+        pass
+
     def search(self, search_value: Union[str, dict['level':int, 'position':int], int]) -> Union['Node', 'ContainerNode']:
-        if isinstance(search_value, str):
-            return self.__search_by_type__(EnhancedTree.SearchTypes.PATH, search_value)
-        elif isinstance(search_value, dict):
-            return self.__search_by_type__(EnhancedTree.SearchTypes.CORDINATES, search_value)
-        elif isinstance(search_value, int):
-            return self.__search_by_type__(EnhancedTree.SearchTypes.ID, search_value)
-        else:
-            raise Exception('Invalid search value type')
+        return EnhancedTree.__Search__.__search__(self, search_value)
+    
+    def depth(self)->int:
+        return self.base_dir.get_max_depth()
