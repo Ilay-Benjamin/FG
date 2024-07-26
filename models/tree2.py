@@ -657,13 +657,12 @@ class Tree:
 class TreeData:
 
     def __init__(self, tree:Tree):
-        self.tree = tree
         self.matrix = []
-        self.build_matrix()
+        self.build_matrix(tree)
 
-    def build_matrix(self):
+    def build_matrix(self, tree: Tree):
         self.matrix = []
-        root = self.tree.base_dir
+        root = tree
         max_depth = root.get_max_depth() + 1
         for level in range(max_depth):
             self.matrix.append([])

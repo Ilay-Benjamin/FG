@@ -286,7 +286,7 @@ class TreePrinter:
             return TreePrinter.NodePrinter.get_summary_text(node)
 
     @staticmethod
-    def print(node: Union['ContainerNode', 'Node'], format: Literal['TreePrinter.Formats']):
+    def print(node: Union['ContainerNode', 'Node'], format: Literal['TreePrinter.Formats'] = Formats.STRUCTURE):
         if format == TreePrinter.Formats.STRUCTURE:
             TreePrinter.print_structure(node)
         elif format == TreePrinter.Formats.DETAILS:
