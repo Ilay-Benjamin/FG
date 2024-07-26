@@ -25,7 +25,8 @@ def run():
 
     enhanced_tree.print()
 
-    path_to_search = 'src\\users\\users_utils\\user_initilaze.ts'
+    #path_to_search = 'src\\users\\users_utils\\user_initilaze.ts'
+    path_to_search = 3
 
     search_result = enhanced_tree.search(path_to_search)
 

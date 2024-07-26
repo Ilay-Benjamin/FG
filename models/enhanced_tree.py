@@ -52,7 +52,7 @@ class EnhancedTree(Tree):
     class __TreeSearch__():
 
         class __SearchTypes__(Enum):
-            NAME = 'NAME',
+            ID = 'ID',
             PATH = 'PATH',
             CORDINATES = 'CORDINATES',
 
@@ -84,6 +84,7 @@ class EnhancedTree(Tree):
         def __search_by_id_handler__(tree: 'EnhancedTree', id:int) -> Union['Node', 'ContainerNode']:        
             return tree.get_by_id(id)
 
+
         Types = __SearchTypes__
 
 
@@ -111,13 +112,23 @@ class EnhancedTree(Tree):
         self.base_dir.append(node, parent)
         return self
     
-    def search(self, search_type: Literal['EnhancedTree.SearchTypes'] = Literal['EnhancedTree.SearchTypes.Path'], 
-               search_value: Union[str, dict['level':int, 'position':int], int] = '') -> Union['Node', 'ContainerNode']:
-        if search_type == EnhancedTree.SearchTypes.NAME:
-            return EnhancedTree.__TreeSearch__.search_by_path(self, search_value)
+    def __search_by_type__(self, search_type: Literal['EnhancedTree.SearchTypes'], 
+               search_value: Union[str, dict['level':int, 'position':int], int]) -> Union['Node', 'ContainerNode']:
+        if search_type == EnhancedTree.SearchTypes.ID:
+            return EnhancedTree.__TreeSearch__.search_by_id(self, search_value)
         elif search_type == EnhancedTree.SearchTypes.PATH:
             return EnhancedTree.__TreeSearch__.search_by_path(self, search_value)
         elif search_type == EnhancedTree.SearchTypes.CORDINATES:
             return EnhancedTree.__TreeSearch__.search_by_cordinates(self, search_value)
-        else:
+        else:  
             raise Exception('Invalid search type')
+        
+    def search(self, search_value: Union[str, dict['level':int, 'position':int], int]) -> Union['Node', 'ContainerNode']:
+        if isinstance(search_value, str):
+            return self.__search_by_type__(EnhancedTree.SearchTypes.PATH, search_value)
+        elif isinstance(search_value, dict):
+            return self.__search_by_type__(EnhancedTree.SearchTypes.CORDINATES, search_value)
+        elif isinstance(search_value, int):
+            return self.__search_by_type__(EnhancedTree.SearchTypes.ID, search_value)
+        else:
+            raise Exception('Invalid search value type')
